@@ -1,0 +1,8 @@
+*.pt
+__pycache__
+
+
+data
+runs
+outputs
+detect_results

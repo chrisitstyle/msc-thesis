@@ -1,0 +1,7 @@
+train: ./data/Train/images
+val: ./data/Test/images
+
+nc: 4
+names: ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
+# Download the dataset from https://www.kaggle.com/datasets/masoudnickparvar/mri-brain-tumor-dataset
+# and place it in the data directory. Just run download_dataset.py to download the dataset.
