@@ -1,0 +1,10 @@
+data
+datasets
+__pycache__
+*.png
+*.csv
+*.jpg
+*.pth
+.idea
+main.py
+
