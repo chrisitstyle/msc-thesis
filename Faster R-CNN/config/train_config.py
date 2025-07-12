@@ -13,7 +13,6 @@ VAL_ROOT          = "data/Val"
 # but for CM and names we keep only the true 4 classes)
 NUM_CLASSES       = 5
 CLASS_NAMES       = ["Glioma", "Meningioma", "No Tumor", "Pituitary"]
-
 BATCH_SIZE        = 2
 NUM_EPOCHS        = 25
 LR                = 0.005
