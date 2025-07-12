@@ -2,7 +2,7 @@ import os
 import torch
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
@@ -21,7 +21,8 @@ from config.train_config import (
     NUM_CLASSES, CLASS_NAMES, BATCH_SIZE, NUM_EPOCHS,
     LR, MOMENTUM, SCORE_THRESHOLD,
     MODEL_SAVE_PATH, METRICS_CSV, METRICS_PNG,
-    CM_CSV, CM_PNG, VAL_METRICS_CSV, VAL_METRICS_PNG
+    CM_CSV, CM_PNG, VAL_METRICS_CSV, VAL_METRICS_PNG,
+RESULTS_DIR
 )
 
 VALID_EXTS = (".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff")
@@ -47,6 +48,7 @@ def load_image(path, device):
     return tensor, img
 
 def main():
+    os.makedirs(RESULTS_DIR, exist_ok=True)
     # Select computation device (GPU if available, else CPU)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🧠 Device: {device}")
@@ -91,7 +93,7 @@ def main():
     for epoch in range(1, NUM_EPOCHS + 1):
         model.train()
         running = {k: 0.0 for k in history if k != "epoch"}
-        print(f"\n🚀 Epoch {epoch}/{NUM_EPOCHS}")
+        print(f"\n Epoch {epoch}/{NUM_EPOCHS}")
 
         pbar = tqdm(
             train_loader,
@@ -121,7 +123,7 @@ def main():
         for k in running:
             history[k].append(running[k] / n_batches)
 
-        print(f"  ➜ loss_total = {history['loss_total'][-1]:.4f}")
+        print(f"loss_total = {history['loss_total'][-1]:.4f}")
 
         # Save training metrics to CSV and plot PNG
         df = pd.DataFrame(history)
@@ -158,32 +160,42 @@ def main():
             if len(scores) > 0 and scores.max() >= SCORE_THRESHOLD:
                 pred = int(labels[scores.argmax()])
             else:
-                pred = 0
+                pred = CLASS_NAMES.index("No Tumor") + 1
             y_pred.append(pred)
 
             rel = os.path.relpath(p, VAL_ROOT).split(os.sep)[0]
             y_true.append(CLASS_NAMES.index(rel) + 1 if rel in CLASS_NAMES else 0)
 
     # Confusion matrix
-    labels_all = [0] + list(range(1, len(CLASS_NAMES) + 1))
-    cm = confusion_matrix(y_true, y_pred, labels=labels_all)
-    pd.DataFrame(cm, index=["bg"] + CLASS_NAMES, columns=["pred_bg"] + CLASS_NAMES).to_csv(CM_CSV)
+        # after gathering y_true, y_pred
+        # labels_all = [1,2,3,4] - indexes of CLASS_NAMES
+        labels_all = list(range(1, len(CLASS_NAMES) + 1))
+        cm = confusion_matrix(y_true, y_pred, labels=labels_all)
 
-    plt.figure()
-    ax = plt.gca()
-    ax.imshow(cm)
-    ax.set_xticks(range(len(labels_all)))
-    ax.set_xticklabels(["bg"] + CLASS_NAMES, rotation=45, ha="right")
-    ax.set_yticks(range(len(labels_all)))
-    ax.set_yticklabels(["bg"] + CLASS_NAMES)
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("True")
-    for i in range(len(labels_all)):
-        for j in range(len(labels_all)):
-            ax.text(j, i, cm[i, j], ha="center", va="center")
-    plt.tight_layout()
-    plt.savefig(CM_PNG)
-    plt.close()
+        #
+        # save confusion matrix as CSV
+        pd.DataFrame(cm, index=CLASS_NAMES, columns=CLASS_NAMES) \
+            .to_csv(CM_CSV)
+
+        # plot confusion matrix YOLO style
+        plt.figure(figsize=(7, 6))
+        sns.heatmap(
+            cm,
+            annot=True, fmt='d',
+            cmap='Blues',
+            cbar=True,
+            square=True,
+            xticklabels=CLASS_NAMES,
+            yticklabels=CLASS_NAMES
+        )
+        plt.xlabel("Predicted")
+        plt.ylabel("True")
+        plt.title("Confusion Matrix")
+        plt.xticks(rotation=45, ha="right")
+        plt.yticks(rotation=0)
+        plt.tight_layout()
+        plt.savefig(CM_PNG)
+        plt.close()
 
     # Accuracy, Precision, Recall, F1-score
     acc  = accuracy_score(y_true, y_pred)
