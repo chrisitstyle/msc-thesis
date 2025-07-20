@@ -1,10 +1,10 @@
 from ultralytics import YOLO
-
-def load_model(model_path="yolov8n.pt"):
+from config import MODEL_NAME
+def load_model(model_path=MODEL_NAME):
     return YOLO(model_path)
 
 def train_model():
-    model = YOLO("yolov8n.pt")
+    model = YOLO(MODEL_NAME)
     model.train(data="dataset.yaml", epochs=50, imgsz=640, batch=16)
 
 def detect(model, image_path):
