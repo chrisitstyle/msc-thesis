@@ -4,7 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 
 def count_images_and_labels(base_path):
-    for category in ["Glioma", "Meningioma", "Notumor", "Pituitary"]:
+    for category in ["Glioma", "Meningioma", "No Tumor", "Pituitary"]:
         image_files = glob(os.path.join(base_path, category, "images", "*.jpg"))
         label_files = glob(os.path.join(base_path, category, "labels", "*.txt"))
         print(f"{category}: {len(image_files)} images, {len(label_files)} labels")
