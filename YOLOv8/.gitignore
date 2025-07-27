@@ -3,6 +3,7 @@ __pycache__
 
 .idea
 data
+wandb
 runs
 outputs
 detect_results
