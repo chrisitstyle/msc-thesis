@@ -7,3 +7,4 @@ wandb
 runs
 outputs
 detect_results
+yolo_results
