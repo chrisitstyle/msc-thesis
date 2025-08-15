@@ -10,7 +10,8 @@ def train_without_augmentation():
         epochs=EPOCHS,
         imgsz=IMAGE_SIZE,
         batch=BATCH_SIZE,
-        pretrained=False
+        pretrained=False,
+        auto_augment=False,
     )
 
 
