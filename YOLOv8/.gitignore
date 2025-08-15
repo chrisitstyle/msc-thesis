@@ -10,3 +10,4 @@ outputs
 detect_results
 yolo_results
 test-yolo
+dummy
