@@ -1,15 +1,55 @@
+import os
+
+from dotenv import load_dotenv
 from ultralytics import YOLO
-from config import EPOCHS, IMAGE_SIZE, BATCH_SIZE, MODEL_NAME
+
+import wandb
+from config import EPOCHS, IMAGE_SIZE, BATCH_SIZE, MODEL_NAME, make_wandb_aug_config
+from utils import on_train_epoch_start, on_train_epoch_end, on_train_end
 
 
 def train_with_augmentation():
+    load_dotenv()
+    wandb.login(key=os.getenv("WANDB_API_KEY"))
+    wandb.init(
+        project="msc-thesis",
+        name="yolov8n-aug",
+        group="yolov8",
+        tags=["yolov8n", "n", "aug"],
+        # config={
+        #     "epochs": EPOCHS,
+        #     "imgsz": IMAGE_SIZE,
+        #     "batch_size": BATCH_SIZE
+        # },
+        config=make_wandb_aug_config(),
+        id="y8n-aug"
+    )
+
+    try:
+        wandb.define_metric("epoch")
+        wandb.define_metric("epoch_time_sec", step_metric="epoch")
+        wandb.define_metric("epoch_time_min", step_metric="epoch")
+        wandb.define_metric("gpu_mem_gb", step_metric="epoch")
+        # final metrics (after training) do not require step_metric
+    except Exception:
+        pass
     model = YOLO(MODEL_NAME, task="detect")
+
+    model.add_callback("on_train_epoch_start", on_train_epoch_start)
+    model.add_callback("on_train_epoch_end", on_train_epoch_end)
+    model.add_callback("on_train_end", on_train_end)
+
     model.train(
         data="dataset.yaml",
         epochs=EPOCHS,
         imgsz=IMAGE_SIZE,
         batch=BATCH_SIZE,
         pretrained=False,
+        project="msc-thesis",
+        name="yolov8n-aug",
+        # save_txt=True,
+        # save_conf=True,
+        # save_json=True,
         augment=True,
         auto_augment=False,  # Disable AutoAugment
         # Geometric transformations
@@ -34,7 +74,14 @@ def train_with_augmentation():
 
         # Mosaic closure towards the end of training
         close_mosaic=20,  # Disable mosaic 20 epochs before the end
+
+        # disabled default yolo augmentations
+        cutmix=0.0,
+        copy_paste=0.0,
+        erasing=0.0,
     )
+
+    wandb.finish()
 
 
 if __name__ == "__main__":
