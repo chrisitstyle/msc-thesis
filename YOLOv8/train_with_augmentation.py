@@ -16,11 +16,6 @@ def train_with_augmentation():
         name="yolov8n-aug",
         group="yolov8",
         tags=["yolov8n", "n", "aug"],
-        # config={
-        #     "epochs": EPOCHS,
-        #     "imgsz": IMAGE_SIZE,
-        #     "batch_size": BATCH_SIZE
-        # },
         config=make_wandb_aug_config(),
         id="y8n-aug"
     )
@@ -47,11 +42,8 @@ def train_with_augmentation():
         pretrained=False,
         project="msc-thesis",
         name="yolov8n-aug",
-        # save_txt=True,
-        # save_conf=True,
-        # save_json=True,
         augment=True,
-        auto_augment=False,  # Disable AutoAugment
+        auto_augment=False,
         # Geometric transformations
         degrees=15.0,  # Rotation ±15°
         translate=0.15,  # Translation 15%

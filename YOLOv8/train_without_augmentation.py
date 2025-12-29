@@ -21,11 +21,6 @@ def train_without_augmentation():
         name="yolov8n",
         group="yolov8",
         tags=["yolov8n", "n", "no-aug"],
-        # config={
-        #     "epochs": EPOCHS,
-        #     "imgsz": IMAGE_SIZE,
-        #     "batch_size": BATCH_SIZE
-        # },
         config=make_wandb_without_aug_config(),
         id="y8n"
     )

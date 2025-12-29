@@ -168,7 +168,7 @@ def on_train_epoch_end(trainer):
     else:
         gpu_mem_gb = 0.0
 
-    epoch_idx = int(getattr(trainer, "epoch", 0)) + 1  # 1-based
+    epoch_idx = int(getattr(trainer, "epoch", 0)) + 1
 
     try:
         wandb.log({
